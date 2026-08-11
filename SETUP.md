@@ -1,10 +1,41 @@
 # Friction Firewall setup guide
 
-This guide is for a person or team adopting the Friction Firewall independently. No software installation is required. The firewall is a process and a reusable prompt/template.
+This guide is for a person or team adopting the Friction Firewall independently. The included installer creates a local policy pack; no LLM or account is required.
+
+## Quick install
+
+From a checkout of this repository, run:
+
+```sh
+./setup.sh "$HOME/friction-firewall"
+```
+
+Or choose any destination directory:
+
+```sh
+./setup.sh /path/to/my-project/.friction-firewall
+```
+
+The installer creates:
+
+```text
+<destination>/
+├── FRICTION-FIREWALL.md  # operating rules and preflight
+├── LOCAL-POLICY.md       # fill in your organization’s specifics
+└── TASK-PREFLIGHT.md     # copy for each non-trivial task
+```
+
+It does not contact an external service, install dependencies, or overwrite existing files. To replace files intentionally, use `--force`:
+
+```sh
+./setup.sh --force /path/to/my-project/.friction-firewall
+```
+
+After installation, open `LOCAL-POLICY.md`, fill it in, and use `TASK-PREFLIGHT.md` at the start of your next reversible task.
 
 ## 1. Copy the core files
 
-Copy `README.md` and this guide into the place where your team keeps operating procedures. If you use an AI assistant, place the firewall instructions in the assistant's project instructions or task template. If you use human operators, put the preflight block in your work-request form.
+If you do not want to use the installer, copy `FRICTION-FIREWALL.md`, `LOCAL-POLICY.md`, and `TASK-PREFLIGHT.md` into the place where your team keeps operating procedures. If you use an AI assistant, place the firewall instructions in the assistant's project instructions or task template. If you use human operators, make the preflight block a required section in the work-request form.
 
 Keep the generic README unchanged when possible. Put organization-specific rules in a separate local document so updates to the core firewall can be pulled in cleanly.
 

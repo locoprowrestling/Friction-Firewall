@@ -4,6 +4,10 @@ The Friction Firewall is a lightweight operating system for reducing avoidable m
 
 It is designed for teams using AI assistants, automation, contractors, or any other workflow where speed can hide assumptions. It is generic by design: adapt the nouns and approval boundaries to your organization.
 
+## Set it up
+
+See [SETUP.md](SETUP.md) for the complete setup guide. It explains how to copy the firewall into an existing team workflow, customize protected assets and approval boundaries, and run a first test.
+
 ## The core preflight
 
 Before non-trivial work begins, state these fields plainly:

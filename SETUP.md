@@ -1,19 +1,33 @@
 # Friction Firewall setup guide
 
-This guide is for a person or team adopting the Friction Firewall independently. The included installer creates a local policy pack; no LLM or account is required.
+Run this from a checkout of the repository:
+
+```sh
+./setup.sh --claude-hooks /path/to/my-project/.friction-firewall
+```
+
+That is the fastest complete setup for a Claude Code project. It copies the files and creates project-scoped hooks.
+
+Time needed: about 2 minutes to install, 10 to 20 minutes to fill in the local policy.
 
 ## Quick install
 
-From a checkout of this repository, run:
+For a project with Claude hooks:
 
 ```sh
-./setup.sh "$HOME/friction-firewall"
+./setup.sh --claude-hooks /path/to/my-project/.friction-firewall
 ```
 
-For a project, install into that project's `.friction-firewall` directory:
+For a project where `.claude/` already exists, this also works:
 
 ```sh
 ./setup.sh /path/to/my-project/.friction-firewall
+```
+
+For files only, with no hook changes:
+
+```sh
+./setup.sh --no-hooks /path/to/my-project/.friction-firewall
 ```
 
 The installer creates:
@@ -22,29 +36,37 @@ The installer creates:
 <destination>/
 ├── FRICTION-FIREWALL.md  # operating rules and preflight
 ├── LOCAL-POLICY.md       # fill in your organization’s specifics
-└── TASK-PREFLIGHT.md     # copy for each non-trivial task
+├── TASK-PREFLIGHT.md     # copy for each non-trivial task
+└── friction-firewall-hook.mjs
 ```
 
-It also installs `friction-firewall-hook.mjs`, a dependency-free hook runner.
+## Hook install behavior
 
-If the destination is `/path/to/my-project/.friction-firewall` and `/path/to/my-project/.claude/settings.local.json` already exists, or `/path/to/my-project/.claude/` exists, the installer merges project-scoped Claude hooks into the existing settings:
+When hooks are enabled, `setup.sh` edits `/path/to/my-project/.claude/settings.local.json`.
 
-- `UserPromptSubmit`: prints the preflight reminder at the start of each prompt.
-- `PreToolUse` for `Bash`: blocks obvious risky shell commands unless the command names backup/rollback language or includes `FIREWALL_OK`.
+It does five things:
 
-The merge preserves existing hooks and adds the Friction Firewall hook commands only once. It does not add global hooks.
+1. Creates `/path/to/my-project/.claude/` if `--claude-hooks` is used.
+2. Preserves existing hook entries.
+3. Adds one `UserPromptSubmit` hook for the preflight reminder.
+4. Adds one `PreToolUse` Bash hook for risky command checks.
+5. Avoids adding duplicate Friction Firewall hooks on repeat installs.
 
-To create Claude project hooks even when `.claude/` does not already exist, run:
+It does not add global hooks.
+
+## What gets blocked
+
+The Bash hook blocks obvious risky commands when they do not name rollback or approval language. Examples include recursive force deletion, hard git resets, forced pushes, broad recursive ownership changes, and deployment/delete commands from common CLIs.
+
+To proceed after the approval boundary is satisfied, name the rollback in the command or include `FIREWALL_OK`:
 
 ```sh
-./setup.sh --claude-hooks /path/to/my-project/.friction-firewall
+FIREWALL_OK git push --force-with-lease
 ```
 
-To install only the files and skip hook changes:
+Use the override only after the backup, rollback, or approval is real.
 
-```sh
-./setup.sh --no-hooks /path/to/my-project/.friction-firewall
-```
+## Overwrite behavior
 
 It does not contact an external service, install dependencies, or overwrite existing files. To replace files intentionally, use `--force`:
 
@@ -52,15 +74,23 @@ It does not contact an external service, install dependencies, or overwrite exis
 ./setup.sh --force /path/to/my-project/.friction-firewall
 ```
 
-After installation, open `LOCAL-POLICY.md`, fill it in, and use `TASK-PREFLIGHT.md` at the start of your next reversible task.
+## First setup pass
 
-## 1. Copy the core files
+1. Run `./setup.sh --claude-hooks /path/to/my-project/.friction-firewall`.
+2. Open `/path/to/my-project/.friction-firewall/LOCAL-POLICY.md`.
+3. Fill in protected assets, approval owners, rollback locations, and verification checks.
+4. Run one small reversible task using the preflight.
+5. Record what the firewall caught or missed.
+
+Do not begin with a live deployment, irreversible migration, customer communication, or deletion test.
+
+## Manual setup
 
 If you do not want to use the installer, copy `FRICTION-FIREWALL.md`, `LOCAL-POLICY.md`, and `TASK-PREFLIGHT.md` into the place where your team keeps operating procedures. If you use an AI assistant, place the firewall instructions in the assistant's project instructions or task template. If you use human operators, make the preflight block a required section in the work-request form.
 
 Keep the generic README unchanged when possible. Put organization-specific rules in a separate local document so updates to the core firewall can be pulled in cleanly.
 
-## 2. Define your local adapter
+## Local policy fields
 
 Create a short local policy answering these questions:
 
@@ -79,7 +109,7 @@ Examples of protected assets include production databases, approved brand files,
 
 Do not copy another organization’s protected-asset list blindly. The list is useful only if it matches your actual systems and responsibilities.
 
-## 3. Add the preflight to your workflow
+## Preflight block
 
 Put this block at the beginning of every non-trivial task:
 
@@ -96,7 +126,7 @@ Friction Firewall:
 
 For an AI assistant, require the assistant to show this block before it edits files, calls an external service, or changes live state. For a human team, make the block a required section in the ticket or task description.
 
-## 4. Set approval boundaries
+## Approval boundaries
 
 Mark which actions can proceed automatically and which require a named approval. At minimum, require approval before:
 
@@ -108,11 +138,9 @@ Mark which actions can proceed automatically and which require a named approval.
 
 The firewall does not replace your security, privacy, legal, or change-management policies. It is the checkpoint that makes those policies visible at the moment of action.
 
-## 5. Run a first test
+## First test record
 
-Choose a small, reversible task such as drafting an internal document or making a change on a feature branch. Have the operator complete the preflight, perform the work, and verify the actual result.
-
-Record:
+After the first reversible task, record:
 
 ```text
 Task:
@@ -122,9 +150,7 @@ Verification performed:
 Rule to add or remove:
 ```
 
-Do not begin with a live deployment, irreversible migration, customer communication, or deletion test.
-
-## 6. Maintain the system
+## Maintenance
 
 Review the local adapter after incidents, near misses, or changes to your systems. Add a rule only when it prevents a demonstrated failure or closes a real ambiguity. Remove rules that no longer match reality. Keep the core preflight short enough that people will actually use it.
 

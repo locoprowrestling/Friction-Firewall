@@ -6,7 +6,7 @@ It is designed for teams using AI assistants, automation, contractors, or any ot
 
 ## Set it up
 
-See [SETUP.md](SETUP.md) for the complete setup guide. It includes a runnable installer for people who want to set up a local copy without an LLM, plus instructions for customizing protected assets and approval boundaries.
+See [SETUP.md](SETUP.md) for the complete setup guide. It includes a runnable installer for people who want to set up a local copy without an LLM, optional project-scoped Claude hook installation, plus instructions for customizing protected assets and approval boundaries.
 
 ## The core preflight
 

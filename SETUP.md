@@ -10,7 +10,7 @@ From a checkout of this repository, run:
 ./setup.sh "$HOME/friction-firewall"
 ```
 
-Or choose any destination directory:
+For a project, install into that project's `.friction-firewall` directory:
 
 ```sh
 ./setup.sh /path/to/my-project/.friction-firewall
@@ -23,6 +23,27 @@ The installer creates:
 ├── FRICTION-FIREWALL.md  # operating rules and preflight
 ├── LOCAL-POLICY.md       # fill in your organization’s specifics
 └── TASK-PREFLIGHT.md     # copy for each non-trivial task
+```
+
+It also installs `friction-firewall-hook.mjs`, a dependency-free hook runner.
+
+If the destination is `/path/to/my-project/.friction-firewall` and `/path/to/my-project/.claude/settings.local.json` already exists, or `/path/to/my-project/.claude/` exists, the installer merges project-scoped Claude hooks into the existing settings:
+
+- `UserPromptSubmit`: prints the preflight reminder at the start of each prompt.
+- `PreToolUse` for `Bash`: blocks obvious risky shell commands unless the command names backup/rollback language or includes `FIREWALL_OK`.
+
+The merge preserves existing hooks and adds the Friction Firewall hook commands only once. It does not add global hooks.
+
+To create Claude project hooks even when `.claude/` does not already exist, run:
+
+```sh
+./setup.sh --claude-hooks /path/to/my-project/.friction-firewall
+```
+
+To install only the files and skip hook changes:
+
+```sh
+./setup.sh --no-hooks /path/to/my-project/.friction-firewall
 ```
 
 It does not contact an external service, install dependencies, or overwrite existing files. To replace files intentionally, use `--force`:

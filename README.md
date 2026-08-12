@@ -3,10 +3,10 @@
 Install into a project:
 
 ```sh
-./setup.sh --claude-hooks /path/to/my-project/.friction-firewall
+./setup.sh --claude-hooks --codex /path/to/my-project/.friction-firewall
 ```
 
-That command copies the Friction Firewall files and creates project-scoped Claude hooks. It does not install global hooks, contact external services, or require an LLM.
+That command copies the Friction Firewall files, creates project-scoped Claude hooks, and adds an idempotent Codex section to the project's `AGENTS.md`. It does not install global hooks, contact external services, or require an LLM.
 
 ## What it does
 
@@ -23,13 +23,17 @@ It is designed for teams using AI assistants, automation, contractors, or any wo
 ## Setup path
 
 1. Clone or download this repository.
-2. Run `./setup.sh --claude-hooks /path/to/my-project/.friction-firewall`.
+2. Run `./setup.sh --claude-hooks --codex /path/to/my-project/.friction-firewall`.
 3. Edit `/path/to/my-project/.friction-firewall/LOCAL-POLICY.md`. See
    [LOCAL-POLICY.example.md](LOCAL-POLICY.example.md) for a filled-out,
    anonymized example of what each field should look like.
 4. Start the next non-trivial task with the preflight block.
 
 See [SETUP.md](SETUP.md) for the complete setup guide.
+
+Use `--no-hooks` or `--no-codex` to skip either assistant integration. The
+Codex section is marked and idempotent, so rerunning setup preserves unrelated
+`AGENTS.md` instructions and replaces only its own section.
 
 ## Hook behavior
 

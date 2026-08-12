@@ -3,7 +3,7 @@
 Run this from a checkout of the repository:
 
 ```sh
-./setup.sh --claude-hooks /path/to/my-project/.friction-firewall
+./setup.sh --claude-hooks --codex /path/to/my-project/.friction-firewall
 ```
 
 That is the fastest complete setup for a Claude Code project. It copies the files and creates project-scoped hooks.
@@ -15,7 +15,7 @@ Time needed: about 2 minutes to install, 10 to 20 minutes to fill in the local p
 For a project with Claude hooks:
 
 ```sh
-./setup.sh --claude-hooks /path/to/my-project/.friction-firewall
+./setup.sh --claude-hooks --codex /path/to/my-project/.friction-firewall
 ```
 
 For a project where `.claude/` already exists, this also works:
@@ -76,7 +76,7 @@ It does not contact an external service, install dependencies, or overwrite exis
 
 ## First setup pass
 
-1. Run `./setup.sh --claude-hooks /path/to/my-project/.friction-firewall`.
+1. Run `./setup.sh --claude-hooks --codex /path/to/my-project/.friction-firewall`.
 2. Open `/path/to/my-project/.friction-firewall/LOCAL-POLICY.md`.
 3. Fill in protected assets, approval owners, rollback locations, and verification checks.
 4. Run one small reversible task using the preflight.

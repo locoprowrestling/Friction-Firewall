@@ -3,6 +3,7 @@ set -euo pipefail
 
 force=0
 install_claude_hooks=auto
+install_codex=auto
 
 while [[ "${1:-}" == --* ]]; do
   case "$1" in
@@ -18,8 +19,16 @@ while [[ "${1:-}" == --* ]]; do
       install_claude_hooks=0
       shift
       ;;
+    --codex)
+      install_codex=1
+      shift
+      ;;
+    --no-codex)
+      install_codex=0
+      shift
+      ;;
     --help)
-      echo "Usage: $0 [--force] [--claude-hooks|--no-hooks] DESTINATION"
+      echo "Usage: $0 [--force] [--claude-hooks|--no-hooks] [--codex|--no-codex] DESTINATION"
       exit 0
       ;;
     *)
@@ -32,11 +41,11 @@ done
 
 destination="${1:-}"
 if [[ "$destination" == "-h" ]]; then
-  echo "Usage: $0 [--force] [--claude-hooks|--no-hooks] DESTINATION"
+  echo "Usage: $0 [--force] [--claude-hooks|--no-hooks] [--codex|--no-codex] DESTINATION"
   exit 0
 fi
 if [[ -z "$destination" ]]; then
-  echo "Usage: $0 [--force] [--claude-hooks|--no-hooks] DESTINATION" >&2
+  echo "Usage: $0 [--force] [--claude-hooks|--no-hooks] [--codex|--no-codex] DESTINATION" >&2
   echo "Install a local Friction Firewall pack without external services." >&2
   exit 2
 fi
@@ -115,11 +124,59 @@ fs.writeFileSync(settingsPath, `${JSON.stringify(settings, null, 2)}\n`);
 NODE
 fi
 
+if [[ "$install_codex" == "auto" ]]; then
+  if [[ -f "$project_dir/AGENTS.md" ]]; then install_codex=1; else install_codex=0; fi
+fi
+
+codex_agents="$project_dir/AGENTS.md"
+codex_start="<!-- friction-firewall:codex:start -->"
+codex_end="<!-- friction-firewall:codex:end -->"
+if [[ "$install_codex" -eq 1 ]]; then
+  if [[ ! -e "$codex_agents" ]]; then
+    printf '# Agent Instructions\n\n' > "$codex_agents"
+  fi
+  CODEX_AGENTS_PATH="$codex_agents" CODEX_HOOK_PATH="$destination_abs/friction-firewall-hook.mjs" CODEX_START="$codex_start" CODEX_END="$codex_end" node <<'NODE'
+const fs = require("node:fs");
+const file = process.env.CODEX_AGENTS_PATH;
+const hook = process.env.CODEX_HOOK_PATH;
+const start = process.env.CODEX_START;
+const end = process.env.CODEX_END;
+let content = fs.readFileSync(file, "utf8");
+const block = `${start}
+## Friction Firewall for Codex
+
+Before non-trivial work, run:
+
+\`\`\`sh
+node "${hook}" prompt
+\`\`\`
+
+Then state Ask, Read first, Protected assets, Destructive or live risk,
+Backup/rollback, Estimate, and Next action. Prepare a Ready Packet before
+handing a human a live UI or manual workflow. Use machine-first handoffs,
+verify actual artifacts or live readbacks, and stop after two failed attempts
+on the same defect to question the approach. Codex does not have a universal
+harness-enforced pretool hook, so treat destructive and live-state commands as
+manual hard stops requiring a named rollback and approval when appropriate.
+${end}`;
+const escaped = start.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&");
+const pattern = new RegExp(`${escaped}[\\s\\S]*?${end.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}`);
+if (pattern.test(content)) content = content.replace(pattern, block);
+else content = `${content.trimEnd()}\n\n${block}\n`;
+fs.writeFileSync(file, content);
+NODE
+fi
+
 echo "Installed Friction Firewall pack in: $destination_abs"
 if [[ "$install_claude_hooks" -eq 1 ]]; then
   echo "Merged Claude project hooks into: $claude_settings"
 else
   echo "No Claude project hooks found; skipped hook merge."
   echo "Use --claude-hooks to create $claude_settings."
+fi
+if [[ "$install_codex" -eq 1 ]]; then
+  echo "Merged Codex instructions into: $codex_agents"
+else
+  echo "Skipped Codex instructions. Use --codex to create or update $codex_agents."
 fi
 echo "Next: edit $destination_abs/LOCAL-POLICY.md"

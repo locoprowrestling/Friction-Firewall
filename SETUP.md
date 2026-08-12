@@ -107,6 +107,9 @@ Progress update interval:
 
 Examples of protected assets include production databases, approved brand files, customer records, release branches, financial data, and source footage. Examples of approval owners include the project owner, release manager, data owner, or account administrator.
 
+See [LOCAL-POLICY.example.md](LOCAL-POLICY.example.md) for a filled-out,
+anonymized example of a completed policy at this level of detail.
+
 Do not copy another organization’s protected-asset list blindly. The list is useful only if it matches your actual systems and responsibilities.
 
 ## Preflight block

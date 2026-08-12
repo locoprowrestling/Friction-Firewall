@@ -24,7 +24,9 @@ It is designed for teams using AI assistants, automation, contractors, or any wo
 
 1. Clone or download this repository.
 2. Run `./setup.sh --claude-hooks /path/to/my-project/.friction-firewall`.
-3. Edit `/path/to/my-project/.friction-firewall/LOCAL-POLICY.md`.
+3. Edit `/path/to/my-project/.friction-firewall/LOCAL-POLICY.md`. See
+   [LOCAL-POLICY.example.md](LOCAL-POLICY.example.md) for a filled-out,
+   anonymized example of what each field should look like.
 4. Start the next non-trivial task with the preflight block.
 
 See [SETUP.md](SETUP.md) for the complete setup guide.
